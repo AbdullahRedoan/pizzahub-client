@@ -1,4 +1,4 @@
-# PizzaHut — Editorial Artisanal Design System
+# PizzaHub — Editorial Artisanal Design System
 
 ## 1. Core Aesthetic & Anti-Slop Rules
 - **Visual Benchmark:** High-contrast editorial pizzeria aesthetic inspired by wood-fired craft.
@@ -12,6 +12,6 @@
 - **Body & UI Sans (`--font-sans`):** `Plus Jakarta Sans` (400/500/600 weight) — used for pill nav links, descriptions, prices, and interactive controls.
 
 ## 3. Signature Structural Elements
-- **Navbar:** Centered `PizzaHut` wordmark flanked symmetrically by `rounded-full border border-border` pill links (`text-xs uppercase tracking-widest`), theme switcher, and cart badge trigger.
+- **Navbar:** Centered `PizzaHub` wordmark flanked symmetrically by `rounded-full border border-border` pill links (`text-xs uppercase tracking-widest`), theme switcher, and cart badge trigger.
 - **Hero Stage:** Central floating pizza slice/pie cutout surrounded by 4–6 independent mid-air ingredient layers (basil leaves, cherry tomatoes, olives) animated with Framer Motion mouse/scroll parallax, grounded by a smooth curved bottom arch divider (`<svg>` wave/arch transitioning from `bg-background` to `bg-card`).
 - **Menu Cards:** Borderless or hairline-bordered containers where circular transparent-PNG pizzas overlap the top edge (`-mt-12`) to break rigid card boundaries.

@@ -22,52 +22,76 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+}
 
-  --font-sans: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-playfair), Georgia, serif;
-  --font-script: var(--font-caveat), cursive;
+/* next/font exposes the three families as --font-serif, --font-script and
+   --font-sans on <html>. Defining the utilities here keeps the variables from
+   pointing at themselves in @theme. */
+@utility font-sans {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+@utility font-serif {
+  font-family: var(--font-serif), Georgia, serif;
+}
+
+@utility font-script {
+  font-family: var(--font-script), cursive;
 }
 
 :root {
-  /* Light Mode: Warm Flour & Tomato */
+  /* Warm Flour — light palette */
   --background: #F8F5EE;
-  --foreground: #181F1C;
   --card: #EFECE4;
+  --foreground: #181F1C;
+  --primary: #2E7D32;
+  --primary-foreground: #F8F5EE;
+  --accent: #D9822B;
+  --accent-foreground: #181F1C;
+  --border: rgba(24, 31, 28, 0.16);
+
+  /* Supporting semantic tokens for shared UI primitives */
   --card-foreground: #181F1C;
   --popover: #F8F5EE;
   --popover-foreground: #181F1C;
-  --primary: #2E7D32;
-  --primary-foreground: #F8F5EE;
   --secondary: #E6E1D6;
   --secondary-foreground: #181F1C;
   --muted: #E6E1D6;
   --muted-foreground: #5C635F;
-  --accent: #D9822B;
-  --accent-foreground: #181F1C;
   --destructive: #C92A2A;
-  --border: rgba(24, 31, 28, 0.16);
   --input: rgba(24, 31, 28, 0.16);
   --ring: #D9822B;
 }
 
 .dark {
-  /* Dark Mode: Editorial Charcoal Slate (Reference Image 4) */
+  /* Charcoal Slate — dark palette */
   --background: #181F1C;
-  --foreground: #F4F1EA;
   --card: #212A26;
+  --foreground: #F4F1EA;
+  --primary: #43A047;
+  --primary-foreground: #181F1C;
+  --accent: #E09F3E;
+  --accent-foreground: #181F1C;
+  --border: rgba(244, 241, 234, 0.16);
+
+  /* Supporting semantic tokens for shared UI primitives */
   --card-foreground: #F4F1EA;
   --popover: #212A26;
   --popover-foreground: #F4F1EA;
-  --primary: #43A047;
-  --primary-foreground: #181F1C;
   --secondary: #2A3530;
   --secondary-foreground: #F4F1EA;
   --muted: #2A3530;
   --muted-foreground: #9DA6A1;
-  --accent: #E09F3E;
-  --accent-foreground: #181F1C;
   --destructive: #E03131;
-  --border: rgba(244, 241, 234, 0.16);
   --input: rgba(244, 241, 234, 0.16);
   --ring: #E09F3E;
+}
+
+html {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
 }
