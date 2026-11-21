@@ -42,11 +42,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
       className={`${playfair.variable} ${caveat.variable} ${jakarta.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col font-sans">
+      <body className="flex min-h-full flex-col bg-background font-sans text-foreground transition-colors duration-300">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           <AuthSessionProvider>
             <Navbar />
-            <main className="flex-1">{children}</main>
+            <main className="flex-1 bg-background text-foreground transition-colors duration-300">{children}</main>
             <Footer />
             <Toaster position="bottom-right" />
           </AuthSessionProvider>
