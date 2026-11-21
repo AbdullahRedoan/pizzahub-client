@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 360" fill="none">
+  <defs>
+    <linearGradient id="crust" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F6DCA6"/>
+      <stop offset="100%" stop-color="#CDA05E"/>
+    </linearGradient>
+    <linearGradient id="cheese" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFF8E6"/>
+      <stop offset="100%" stop-color="#EBD9B2"/>
+    </linearGradient>
+    <linearGradient id="cap" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#A88462"/>
+      <stop offset="100%" stop-color="#6C4C32"/>
+    </linearGradient>
+    <filter id="shadow" x="-40%" y="-30%" width="180%" height="170%">
+      <feDropShadow dx="4" dy="16" stdDeviation="14" flood-color="#3B2412" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <path d="M46 96C96 48 204 48 254 96l16 30c-72-38-168-38-240 0l16-30Z" fill="url(#crust)"/>
+    <path d="M30 126c72-38 168-38 240 0L164 330c-9 15-19 15-28 0L30 126Z" fill="#C9B58E"/>
+    <path d="M39 124c68-33 154-33 222 0L162 314c-8 13-16 13-24 0L39 124Z" fill="url(#cheese)"/>
+    <g fill="url(#cap)">
+      <path d="M78 136c8-18 36-20 46-2 3 7-4 13-11 12l-27-1c-8 0-12-4-8-9Z"/>
+      <path d="M176 124c10-20 40-19 48 1 2 7-5 12-12 11l-28-2c-8-1-12-5-8-10Z"/>
+      <path d="M118 196c9-19 38-20 47-2 3 7-4 13-11 12l-28-1c-9 0-12-4-8-9Z"/>
+      <path d="M192 250c8-17 34-18 43-1 3 7-4 12-11 11l-25-1c-8 0-11-4-7-9Z"/>
+    </g>
+    <g fill="#F3E4C6">
+      <path d="M96 145h10v22H96zM203 134h10v22h-10zM138 205h10v22h-10zM210 259h9v20h-9z"/>
+    </g>
+    <g stroke="#E1C98F" stroke-width="6" stroke-linecap="round" opacity="0.8">
+      <path d="M70 170c28 18 46 30 70 40"/>
+      <path d="M214 186c-14 22-18 42-14 64"/>
+    </g>
+    <g fill="#3E7A43">
+      <path d="M154 154c14-11 29-9 37 3-12 11-26 11-37-3Z"/>
+      <path d="M158 272c14-12 30-11 38 2-13 12-28 11-38-2Z"/>
+    </g>
+  </g>
+</svg>

@@ -1,23 +1,32 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { BenefitsSection } from "@/components/home/benefits-section";
+import { CategorySection } from "@/components/home/category-section";
+import { FeaturedSection } from "@/components/home/featured-section";
+import { HeroSection } from "@/components/home/hero-section";
+import { Reveal } from "@/components/home/reveal";
+import { WorkflowSection } from "@/components/home/workflow-section";
 
 export default function Home() {
   return (
-    <Card className="max-w-sm">
-      <CardHeader>
-        <CardTitle>Project Overview</CardTitle>
-        <CardDescription>
-          Track progress and recent activity for your Next.js app.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        Your design system is ready. Start building your next component.
-      </CardContent>
-    </Card>
-  )
+    <>
+      <Reveal>
+        <HeroSection />
+      </Reveal>
+
+      <Reveal delay={0.08}>
+        <FeaturedSection />
+      </Reveal>
+
+      <Reveal delay={0.12}>
+        <CategorySection />
+      </Reveal>
+
+      <Reveal delay={0.16}>
+        <BenefitsSection />
+      </Reveal>
+
+      <Reveal delay={0.2}>
+        <WorkflowSection />
+      </Reveal>
+    </>
+  );
 }
