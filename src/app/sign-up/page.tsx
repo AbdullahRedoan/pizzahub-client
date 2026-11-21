@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
+import { AuthAmbientBackdrop } from "@/components/auth/auth-ambient-backdrop";
 import { useAuthSession } from "@/context/auth-context";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
@@ -113,8 +114,9 @@ export default function SignUpPage() {
   }
 
   return (
-    <main className="flex min-h-[calc(100vh-10rem)] items-center justify-center px-4 py-12">
-      <div className="w-full max-w-lg space-y-6 rounded-3xl border border-border bg-card p-6 sm:p-8">
+    <main className="relative flex min-h-[calc(100vh-10rem)] items-center justify-center overflow-hidden px-4 py-12">
+      <AuthAmbientBackdrop />
+      <div className="relative z-10 w-full max-w-lg space-y-6 rounded-3xl border border-border bg-card p-6 sm:p-8">
         <div className="space-y-2 text-center">
           <Link
             href="/"
