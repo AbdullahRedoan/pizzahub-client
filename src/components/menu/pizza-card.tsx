@@ -2,8 +2,8 @@
 
 import { motion } from "framer-motion";
 import { ArrowUpRight, MapPin, Star } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import { MenuImage } from "@/components/menu/menu-image";
 
 export type PizzaCardData = {
   id: string;
@@ -14,20 +14,33 @@ export type PizzaCardData = {
   category: string;
   vendorName: string;
   area: string;
-  rating: number;
+  rating?: number;
   status: string;
   premium?: boolean;
   image?: string;
 };
 
-const FALLBACK_IMAGE = "/images/hero-neapolitan.png";
+type PizzaCardProps = {
+  pizza: PizzaCardData;
+  onViewDetails?: (id: string) => void;
+};
 
-export function PizzaCard({ pizza }: { pizza: PizzaCardData }) {
+const DETAILS_CLASS =
+  "flex items-center gap-1.5 rounded-full border border-border px-3.5 py-2 text-xs font-medium text-foreground transition-colors hover:text-accent";
+
+export function PizzaCard({ pizza, onViewDetails }: PizzaCardProps) {
+  const detailsLabel = (
+    <>
+      View Details
+      <ArrowUpRight className="h-3.5 w-3.5" />
+    </>
+  );
+
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-card transition-all duration-300 hover:shadow-xl">
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-background/50">
-        <Image
-          src={pizza.image ?? FALLBACK_IMAGE}
+        <MenuImage
+          src={pizza.image}
           alt={pizza.name}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -46,8 +59,8 @@ export function PizzaCard({ pizza }: { pizza: PizzaCardData }) {
         )}
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 p-5">
-        <div className="flex items-center gap-2 text-xs font-sans uppercase tracking-wide text-foreground/60">
+      <div className="flex flex-1 flex-col gap-3 p-5 font-sans">
+        <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-foreground/60">
           <MapPin className="h-3.5 w-3.5 shrink-0 text-accent" />
           <span className="truncate">{pizza.area}</span>
           <span className="ml-auto truncate normal-case tracking-normal text-foreground">
@@ -60,10 +73,12 @@ export function PizzaCard({ pizza }: { pizza: PizzaCardData }) {
         </h3>
 
         <div className="flex items-center gap-2 text-xs">
-          <span className="flex items-center gap-1 font-medium text-foreground">
-            <Star className="h-3.5 w-3.5 text-accent" fill="currentColor" />
-            {pizza.rating.toFixed(1)}
-          </span>
+          {typeof pizza.rating === "number" && (
+            <span className="flex items-center gap-1 font-medium text-foreground">
+              <Star className="h-3.5 w-3.5 text-accent" fill="currentColor" />
+              {pizza.rating.toFixed(1)}
+            </span>
+          )}
           <span className="rounded-full border border-border px-2 py-0.5 text-[0.65rem] text-accent">
             {pizza.status}
           </span>
@@ -84,13 +99,19 @@ export function PizzaCard({ pizza }: { pizza: PizzaCardData }) {
             whileTap={{ scale: 0.96 }}
             className="shrink-0"
           >
-            <Link
-              href={`/menu/${pizza.id}`}
-              className="flex items-center gap-1.5 rounded-full border border-border px-3.5 py-2 text-xs font-medium text-foreground transition-colors hover:text-accent"
-            >
-              View Details
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </Link>
+            {onViewDetails ? (
+              <button
+                type="button"
+                onClick={() => onViewDetails(pizza.id)}
+                className={DETAILS_CLASS}
+              >
+                {detailsLabel}
+              </button>
+            ) : (
+              <Link href={`/menu/${pizza.id}`} className={DETAILS_CLASS}>
+                {detailsLabel}
+              </Link>
+            )}
           </motion.div>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import {
   Caveat,
   Playfair_Display,
@@ -45,7 +46,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col bg-background font-sans text-foreground transition-colors duration-300">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           <AuthSessionProvider>
-            <Navbar />
+            <Suspense
+              fallback={
+                <div className="h-20 border-b border-border bg-background" />
+              }
+            >
+              <Navbar />
+            </Suspense>
             <main className="flex-1 bg-background text-foreground transition-colors duration-300">{children}</main>
             <Footer />
             <Toaster position="bottom-right" />

@@ -19,38 +19,38 @@ type Category = {
 
 const CATEGORIES: Category[] = [
   {
-    label: "Classic",
-    slug: "classic",
+    label: "Classic Pizzas",
+    slug: "Classic Pizzas",
     description: "Timeless tomato, cheese and basil.",
     icon: Pizza,
   },
   {
-    label: "Vegetarian",
-    slug: "vegetarian",
+    label: "Vegetarian Pizzas",
+    slug: "Vegetarian Pizzas",
     description: "Garden produce, wood-fired.",
     icon: Leaf,
   },
   {
     label: "Meat Lovers",
-    slug: "meat-lovers",
+    slug: "Meat Lovers",
     description: "For the seriously hungry.",
     icon: Beef,
   },
   {
-    label: "Gourmet",
-    slug: "gourmet",
+    label: "Specialty / Gourmet",
+    slug: "Specialty / Gourmet Pizzas",
     description: "Truffles, taleggio and fine craft.",
     icon: Gem,
   },
   {
-    label: "Sides",
-    slug: "sides",
+    label: "Sides & Appetizers",
+    slug: "Sides & Appetizers",
     description: "Garlic knots, salads and more.",
     icon: Cookie,
   },
   {
-    label: "Desserts",
-    slug: "desserts",
+    label: "Beverages & Desserts",
+    slug: "Beverages & Desserts",
     description: "A sweet finish from the oven.",
     icon: CakeSlice,
   },
@@ -78,7 +78,7 @@ export function CategorySection() {
             return (
               <Link
                 key={category.slug}
-                href={`/menu?category=${category.slug}`}
+                href={`/menu?category=${encodeURIComponent(category.slug)}`}
                 className="group flex flex-col gap-4 rounded-3xl border border-border bg-card p-6 transition-all duration-300 hover:shadow-lg"
               >
                 <div className="flex items-start justify-between">

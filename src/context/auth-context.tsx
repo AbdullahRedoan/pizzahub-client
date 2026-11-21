@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { toast } from "sonner";
+import { clearServerJwt } from "@/lib/api-client";
 import { authClient } from "@/lib/auth-client";
 
 export type UserRole = "customer" | "vendor" | "admin";
@@ -60,6 +61,7 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
   }, [data]);
 
   const signOut = useCallback(async () => {
+    clearServerJwt();
     await authClient.signOut();
     toast.success("Signed out of PizzaHub");
     router.push("/");
