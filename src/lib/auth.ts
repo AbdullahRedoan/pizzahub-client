@@ -1,25 +1,72 @@
+import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { betterAuth } from "better-auth";
 import { MongoClient } from "mongodb";
-import { mongodbAdapter } from "@better-auth/mongo-adapter";
 
 const client = new MongoClient(process.env.MONGODB_URI!);
-const db = client.db('pizzahubdb');
+const db = client.db("pizzahubdb");
 
 export const auth = betterAuth({
-    emailAndPassword: { 
-    enabled: true, 
-  }, 
-  socialProviders: { 
-    google: { 
-            clientId: process.env.GOOGLE_CLIENT_ID as string, 
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string, 
+  secret: process.env.BETTER_AUTH_SECRET,
+  baseURL: process.env.BETTER_AUTH_URL,
+  database: mongodbAdapter(db, { client }),
+  emailAndPassword: {
+    enabled: true,
+    minPasswordLength: 6,
+  },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    },
+    facebook: {
+      clientId: process.env.FACEBOOK_CLIENT_ID!,
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
+    },
+  },
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        defaultValue: "customer",
+        input: true,
+      },
+      isBlocked: {
+        type: "boolean",
+        defaultValue: false,
+        input: false,
+      },
+      businessName: {
+        type: "string",
+        required: false,
+        input: true,
+      },
+      subscriptionPlan: {
+        type: "string",
+        defaultValue: "free",
+        input: false,
+      },
+      subscriptionExpiresAt: {
+        type: "date",
+        required: false,
+        input: false,
+      },
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        // Public registration may only self-assign customer or vendor.
+        // Anything else (admin, typos, injected values) is forced to customer.
+        before: async (user) => {
+          const requestedRole = user.role;
+          const role =
+            requestedRole === "customer" || requestedRole === "vendor"
+              ? requestedRole
+              : "customer";
+
+          return { data: { ...user, role } };
         },
-    facebook: { 
-            clientId: process.env.FACEBOOK_CLIENT_ID as string, 
-            clientSecret: process.env.FACEBOOK_CLIENT_SECRET as string, 
-        }
-},
-  database: mongodbAdapter(db, {
-    client,
-  }),
+      },
+    },
+  },
 });

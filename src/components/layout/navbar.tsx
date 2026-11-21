@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  ChevronDown,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -11,11 +12,16 @@ import {
   X,
 } from "lucide-react";
 import { useTheme } from "next-themes";
+import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import { useAuthSession, type UserRole } from "@/context/auth-context";
+import {
+  useAuthSession,
+  type AuthUser,
+  type UserRole,
+} from "@/context/auth-context";
 import { cn } from "@/lib/utils";
 
 type NavLink = {
@@ -59,6 +65,42 @@ function BrandLink({ onClick }: { onClick?: () => void }) {
   );
 }
 
+function SessionSkeleton() {
+  return (
+    <div className="h-10 w-28 animate-pulse rounded-full border border-border bg-card" />
+  );
+}
+
+function Avatar({ user }: { user: AuthUser }) {
+  if (user.image) {
+    return (
+      <Image
+        src={user.image}
+        alt=""
+        width={32}
+        height={32}
+        unoptimized
+        className="h-8 w-8 rounded-full border border-border object-cover"
+      />
+    );
+  }
+
+  const initials =
+    user.name
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? "")
+      .join("") || "PH";
+
+  return (
+    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+      {initials}
+    </span>
+  );
+}
+
 function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   const mounted = useSyncExternalStore(
@@ -89,8 +131,7 @@ function ThemeToggle() {
 
 export function Navbar() {
   const pathname = usePathname();
-  const router = useRouter();
-  const { user, logout } = useAuthSession();
+  const { user, isPending, signOut } = useAuthSession();
   const mounted = useSyncExternalStore(
     subscribeNoop,
     getClientSnapshot,
@@ -104,15 +145,6 @@ export function Navbar() {
   const links: NavLink[] = dashboardHref
     ? [...BASE_LINKS, { label: "Dashboard", href: dashboardHref }]
     : BASE_LINKS;
-
-  const initials =
-    user?.name
-      .trim()
-      .split(/\s+/)
-      .map((part) => part[0] ?? "")
-      .slice(0, 2)
-      .join("")
-      .toUpperCase() || "PH";
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
@@ -140,11 +172,10 @@ export function Navbar() {
     };
   }, []);
 
-  function handleLogout() {
-    void Promise.resolve(logout());
+  async function handleSignOut() {
     setProfileOpen(false);
     setDrawerOpen(false);
-    router.push("/");
+    await signOut();
   }
 
   return (
@@ -162,7 +193,10 @@ export function Navbar() {
             <Menu className="h-5 w-5" />
           </button>
 
-          <nav aria-label="Primary navigation" className="hidden items-center gap-2 md:flex">
+          <nav
+            aria-label="Primary navigation"
+            className="hidden items-center gap-2 md:flex"
+          >
             {links.map((link) => {
               const active = isActive(pathname, link.href);
 
@@ -201,7 +235,9 @@ export function Navbar() {
         <div className="flex items-center justify-end gap-2">
           <ThemeToggle />
 
-          {user ? (
+          {isPending ? (
+            <SessionSkeleton />
+          ) : user ? (
             <div className="relative" ref={profileRef}>
               <button
                 type="button"
@@ -211,12 +247,11 @@ export function Navbar() {
                 onClick={() => setProfileOpen((open) => !open)}
                 className="flex items-center gap-2 rounded-full border border-border bg-card py-1 pl-1 pr-3 text-sm text-foreground"
               >
-                <span className="flex h-7 w-7 items-center justify-center rounded-full border border-border bg-background text-xs font-semibold text-accent">
-                  {initials}
-                </span>
+                <Avatar user={user} />
                 <span className="hidden max-w-24 truncate sm:inline">
                   {user.name}
                 </span>
+                <ChevronDown className="hidden h-3.5 w-3.5 text-foreground sm:block" />
               </button>
 
               <AnimatePresence>
@@ -261,11 +296,11 @@ export function Navbar() {
                       <button
                         type="button"
                         role="menuitem"
-                        onClick={handleLogout}
+                        onClick={handleSignOut}
                         className="flex w-full items-center gap-2 rounded-full px-3 py-2 text-left text-sm text-foreground transition-colors hover:text-accent"
                       >
                         <LogOut className="h-4 w-4" />
-                        Logout
+                        Sign Out
                       </button>
                     </div>
                   </motion.div>
@@ -352,7 +387,11 @@ export function Navbar() {
                             <motion.span
                               layoutId="pizzahub-mobile-nav-pill"
                               className="absolute inset-0 rounded-full border border-primary bg-primary"
-                              transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                              transition={{
+                                type: "spring",
+                                stiffness: 380,
+                                damping: 32,
+                              }}
                             />
                           )}
                           <span className="relative z-10">{link.label}</span>
@@ -362,16 +401,23 @@ export function Navbar() {
                   </nav>
 
                   <div className="flex flex-col gap-3 border-t border-border pt-6">
-                    {user ? (
+                    {isPending ? (
+                      <SessionSkeleton />
+                    ) : user ? (
                       <>
                         <div className="rounded-3xl border border-border bg-background p-4">
-                          <p className="font-serif text-lg font-bold italic text-foreground">
-                            {user.name}
-                          </p>
-                          <p className="truncate text-xs text-foreground">
-                            {user.email}
-                          </p>
-                          <span className="mt-2 inline-flex rounded-full border border-border px-2.5 py-0.5 text-xs font-medium capitalize text-accent">
+                          <div className="flex items-center gap-3">
+                            <Avatar user={user} />
+                            <div className="min-w-0">
+                              <p className="truncate font-serif text-lg font-bold italic text-foreground">
+                                {user.name}
+                              </p>
+                              <p className="truncate text-xs text-foreground">
+                                {user.email}
+                              </p>
+                            </div>
+                          </div>
+                          <span className="mt-3 inline-flex rounded-full border border-border px-2.5 py-0.5 text-xs font-medium capitalize text-accent">
                             {user.role}
                           </span>
                         </div>
@@ -393,11 +439,11 @@ export function Navbar() {
                         </Link>
                         <button
                           type="button"
-                          onClick={handleLogout}
+                          onClick={handleSignOut}
                           className="flex items-center justify-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground"
                         >
                           <LogOut className="h-4 w-4" />
-                          Logout
+                          Sign Out
                         </button>
                       </>
                     ) : (
