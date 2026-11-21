@@ -19,31 +19,24 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     },
     facebook: {
-      clientId: process.env.FACEBOOK_CLIENT_ID!,
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
+      clientId: (process.env.FACEBOOK_CLIENT_ID || "").trim(),
+      clientSecret: (process.env.FACEBOOK_CLIENT_SECRET || "").trim(),
       scopes: ["email", "public_profile"],
-      fields: ["id", "name", "email", "picture"],
-      mapProfileToUser: (profile) => {
-        // Better Auth types this as a Graph | Limited Login union. Web OAuth
-        // returns the Graph shape, but read both shapes so the fallback is safe.
-        const raw = profile as {
-          id?: string;
-          sub?: string;
-          name?: string;
-          email?: string;
-          picture?: string | { data?: { url?: string } };
-        };
-
+      getUserInfo: async (token) => {
+        const res = await fetch(
+          `https://graph.facebook.com/v21.0/me?fields=id,name,email,picture.type(large)&access_token=${encodeURIComponent(token.accessToken || "")}`,
+        );
+        if (!res.ok) return null;
+        const profile = await res.json();
         return {
-          name: raw.name || "Facebook User",
-          email:
-            raw.email ||
-            `${raw.id ?? raw.sub ?? "unknown"}@facebook.pizzahub.local`,
-          image:
-            typeof raw.picture === "string"
-              ? raw.picture
-              : raw.picture?.data?.url,
-          emailVerified: Boolean(raw.email),
+          user: {
+            id: profile.id,
+            name: profile.name || "Facebook User",
+            email: profile.email || `${profile.id}@facebook.pizzahub.local`,
+            image: profile.picture?.data?.url,
+            emailVerified: Boolean(profile.email),
+          },
+          data: profile,
         };
       },
     },
