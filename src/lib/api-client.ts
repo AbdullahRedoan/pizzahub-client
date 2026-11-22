@@ -16,7 +16,7 @@ export class ApiError extends Error {
   }
 }
 
-export type MenuItemStatus = "pending" | "approved" | "rejected";
+export type MenuItemStatus = "pending" | "approved" | "rejected" | "inactive";
 export type OrderStatus = "pending" | "accepted" | "rejected" | "cancelled";
 export type UserRole = "customer" | "vendor" | "admin";
 

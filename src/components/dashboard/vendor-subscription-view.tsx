@@ -8,6 +8,7 @@ import { apiFetch } from "@/lib/api-client";
 type VendorSubscriptionViewProps = {
   email: string;
   subscriptionPlan: string;
+  subscriptionExpiresAt?: string | null;
 };
 
 const FREE_FEATURES = [
@@ -23,12 +24,28 @@ const PREMIUM_FEATURES = [
   "Top priority in the catalog",
 ];
 
+function formatDate(date: Date) {
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
 export function VendorSubscriptionView({
   email,
   subscriptionPlan,
+  subscriptionExpiresAt,
 }: VendorSubscriptionViewProps) {
   const [upgrading, setUpgrading] = useState(false);
   const isPremium = subscriptionPlan.toLowerCase() === "premium";
+  const fallbackEndDate = new Date();
+  fallbackEndDate.setMonth(fallbackEndDate.getMonth() + 1);
+  const subscriptionEndDate = isPremium
+    ? formatDate(
+        subscriptionExpiresAt ? new Date(subscriptionExpiresAt) : fallbackEndDate,
+      )
+    : null;
 
   async function handleUpgrade() {
     if (upgrading) return;
@@ -138,6 +155,11 @@ export function VendorSubscriptionView({
               /month
             </span>
           </p>
+          <p className="mt-2 text-xs text-foreground/60">
+            {isPremium && subscriptionEndDate
+              ? `Subscription ends on ${subscriptionEndDate}`
+              : "Billed monthly. Cancel anytime."}
+          </p>
 
           <ul className="mt-6 space-y-3">
             {PREMIUM_FEATURES.map((feature) => (
@@ -159,9 +181,14 @@ export function VendorSubscriptionView({
               {upgrading ? "Opening checkout…" : "Upgrade to Premium"}
             </button>
           ) : (
-            <p className="mt-7 text-sm text-foreground/70">
-              Your Premium plan is active. Enjoy the prime placement!
-            </p>
+            <div className="mt-7 space-y-1">
+              <p className="text-sm text-foreground/70">
+                Your Premium plan is active. Enjoy the prime placement!
+              </p>
+              <p className="text-sm font-medium text-foreground">
+                Your subscription will end on: {subscriptionEndDate}
+              </p>
+            </div>
           )}
         </section>
       </div>

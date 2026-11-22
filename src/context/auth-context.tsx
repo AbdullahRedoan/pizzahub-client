@@ -24,6 +24,7 @@ export type AuthUser = {
   role: UserRole;
   businessName?: string | null;
   subscriptionPlan: string;
+  subscriptionExpiresAt?: string | null;
   isBlocked: boolean;
 };
 
@@ -35,6 +36,7 @@ type SessionUserLike = {
   role?: unknown;
   businessName?: string | null;
   subscriptionPlan?: string | null;
+  subscriptionExpiresAt?: string | Date | null;
   isBlocked?: boolean | null;
 };
 
@@ -68,6 +70,10 @@ function toAuthUser(
     role: toUserRole(sessionUser.role),
     businessName: sessionUser.businessName ?? null,
     subscriptionPlan: sessionUser.subscriptionPlan ?? "free",
+    subscriptionExpiresAt:
+      sessionUser.subscriptionExpiresAt instanceof Date
+        ? sessionUser.subscriptionExpiresAt.toISOString()
+        : (sessionUser.subscriptionExpiresAt ?? null),
     isBlocked: sessionUser.isBlocked ?? false,
   };
 }

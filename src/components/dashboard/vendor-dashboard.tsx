@@ -42,6 +42,7 @@ export function VendorDashboard({ section }: { section: VendorSection }) {
             <VendorSubscriptionView
               email={user.email}
               subscriptionPlan={user.subscriptionPlan}
+              subscriptionExpiresAt={user.subscriptionExpiresAt}
             />
           )
         ) : null}

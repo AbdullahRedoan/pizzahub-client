@@ -31,6 +31,8 @@ function approvalClass(status: MenuItemStatus) {
       return "border-primary bg-primary text-primary-foreground";
     case "pending":
       return "border-accent bg-accent text-accent-foreground";
+    case "inactive":
+      return "border-border bg-foreground/10 text-foreground/70";
     default:
       return "border-border text-foreground/60";
   }

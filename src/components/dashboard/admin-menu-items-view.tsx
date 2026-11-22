@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Trash2, X } from "lucide-react";
+import { Ban, Check, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { MenuImage } from "@/components/menu/menu-image";
@@ -11,9 +11,9 @@ type AdminMenuItemsViewProps = {
   email: string;
 };
 
-type StatusFilter = "all" | "pending" | "approved" | "rejected";
+type StatusFilter = "all" | "pending" | "approved" | "rejected" | "inactive";
 
-const FILTERS: StatusFilter[] = ["all", "pending", "approved", "rejected"];
+const FILTERS: StatusFilter[] = ["all", "pending", "approved", "rejected", "inactive"];
 
 function approvalClass(status: MenuItem["status"]) {
   switch (status) {
@@ -21,6 +21,8 @@ function approvalClass(status: MenuItem["status"]) {
       return "border-primary bg-primary text-primary-foreground";
     case "pending":
       return "border-accent bg-accent text-accent-foreground";
+    case "inactive":
+      return "border-border bg-foreground/10 text-foreground/70";
     default:
       return "border-border text-foreground/60";
   }
@@ -36,7 +38,10 @@ export function AdminMenuItemsView({ email }: AdminMenuItemsViewProps) {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
-  async function handleStatus(item: MenuItem, status: "approved" | "rejected") {
+  async function handleStatus(
+    item: MenuItem,
+    status: "approved" | "rejected" | "inactive",
+  ) {
     if (busyId) return;
     setBusyId(item._id);
 
@@ -55,9 +60,13 @@ export function AdminMenuItemsView({ email }: AdminMenuItemsViewProps) {
           entry._id === data.item._id ? data.item : entry,
         ),
       );
-      toast.success(
-        status === "approved" ? "Menu item approved" : "Menu item rejected",
-      );
+      const statusMessage =
+        status === "approved"
+          ? "Menu item approved"
+          : status === "rejected"
+            ? "Menu item rejected"
+            : "Menu item marked inactive";
+      toast.success(statusMessage);
     } catch (statusError) {
       toast.error(
         statusError instanceof Error
@@ -230,6 +239,15 @@ export function AdminMenuItemsView({ email }: AdminMenuItemsViewProps) {
                 >
                   <X className="h-3 w-3" />
                   Reject
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleStatus(item, "inactive")}
+                  disabled={busyId === item._id || item.status === "inactive"}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs font-medium text-foreground transition-colors hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Ban className="h-3 w-3" />
+                  Inactive
                 </button>
 
                 {deleteId === item._id ? (
