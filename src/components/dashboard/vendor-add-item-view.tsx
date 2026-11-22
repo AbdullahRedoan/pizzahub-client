@@ -277,10 +277,7 @@ export function VendorAddItemView({
 
           <label className="block">
             <span className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-foreground/70">
-              Direct Image URL{" "}
-              <span className="normal-case tracking-normal text-foreground/50">
-                (optional fallback)
-              </span>
+              Direct Image URL
             </span>
             <input
               type="text"
@@ -289,10 +286,6 @@ export function VendorAddItemView({
               placeholder="https://example.com/pizza.jpg"
               className={fieldClass}
             />
-            <span className="mt-2 block text-xs text-foreground/60">
-              Use this instead of a file upload when an image host is not
-              configured.
-            </span>
           </label>
         </div>
 
