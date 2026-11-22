@@ -4,11 +4,17 @@ import { ImagePlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
+import {
+  isFreePlan,
+  useFreePlanRedirect,
+} from "@/hooks/use-free-plan-redirect";
+import { useApiList } from "@/hooks/use-api-list";
 import { apiFetch, type MenuItem } from "@/lib/api-client";
 import { CATEGORY_OPTIONS } from "@/lib/menu-filters";
 
 type VendorAddItemViewProps = {
   email: string;
+  subscriptionPlan: string;
 };
 
 const EDITORIAL_CATEGORIES = CATEGORY_OPTIONS.filter(
@@ -31,8 +37,17 @@ function readFileAsBase64(file: File): Promise<string> {
   });
 }
 
-export function VendorAddItemView({ email }: VendorAddItemViewProps) {
+export function VendorAddItemView({
+  email,
+  subscriptionPlan,
+}: VendorAddItemViewProps) {
   const router = useRouter();
+  const redirectToSubscription = useFreePlanRedirect();
+  const { items } = useApiList<MenuItem>(
+    email,
+    "/api/vendor/menu-items",
+    "items",
+  );
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [directUrl, setDirectUrl] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -41,9 +56,18 @@ export function VendorAddItemView({ email }: VendorAddItemViewProps) {
   const fieldClass =
     "w-full rounded-full border border-border bg-background px-4 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-foreground/50 focus:border-accent";
 
+  const freePlanIsFull =
+    isFreePlan(subscriptionPlan) &&
+    items.filter((item) => item.active).length >= 3;
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (submitting || uploading) return;
+
+    if (freePlanIsFull) {
+      redirectToSubscription();
+      return;
+    }
 
     const formData = new FormData(event.currentTarget);
     const itemName = String(formData.get("itemName") || "").trim();
@@ -132,6 +156,7 @@ export function VendorAddItemView({ email }: VendorAddItemViewProps) {
       toast.success("Menu item submitted! Status: Pending admin approval");
       router.push("/dashboard/vendor/my-items");
     } catch (submitError) {
+      if (redirectToSubscription(submitError)) return;
       toast.error(
         submitError instanceof Error
           ? submitError.message

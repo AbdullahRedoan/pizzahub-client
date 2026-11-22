@@ -30,9 +30,15 @@ export function VendorDashboard({ section }: { section: VendorSection }) {
               subscriptionPlan={user.subscriptionPlan}
             />
           ) : section === "add-item" ? (
-            <VendorAddItemView email={user.email} />
+            <VendorAddItemView
+              email={user.email}
+              subscriptionPlan={user.subscriptionPlan}
+            />
           ) : section === "my-items" ? (
-            <VendorMyItemsView email={user.email} />
+            <VendorMyItemsView
+              email={user.email}
+              subscriptionPlan={user.subscriptionPlan}
+            />
           ) : section === "orders" ? (
             <VendorOrdersView email={user.email} />
           ) : (

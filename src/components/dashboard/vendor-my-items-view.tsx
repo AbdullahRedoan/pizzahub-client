@@ -4,6 +4,10 @@ import { Pencil, Trash2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { MenuImage } from "@/components/menu/menu-image";
+import {
+  isFreePlan,
+  useFreePlanRedirect,
+} from "@/hooks/use-free-plan-redirect";
 import { useApiList } from "@/hooks/use-api-list";
 import {
   apiFetch,
@@ -14,6 +18,7 @@ import { CATEGORY_OPTIONS } from "@/lib/menu-filters";
 
 type VendorMyItemsViewProps = {
   email: string;
+  subscriptionPlan: string;
 };
 
 const EDITORIAL_CATEGORIES = CATEGORY_OPTIONS.filter(
@@ -31,23 +36,34 @@ function approvalClass(status: MenuItemStatus) {
   }
 }
 
-export function VendorMyItemsView({ email }: VendorMyItemsViewProps) {
+export function VendorMyItemsView({
+  email,
+  subscriptionPlan,
+}: VendorMyItemsViewProps) {
   const { items, isLoading, error, setItems } = useApiList<MenuItem>(
     email,
     "/api/vendor/menu-items",
     "items",
   );
+  const redirectToSubscription = useFreePlanRedirect();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const editing = items.find((item) => item._id === editingId) ?? null;
+  const activeCount = items.filter((item) => item.active).length;
 
   const fieldClass =
     "w-full rounded-full border border-border bg-background px-4 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-foreground/50 focus:border-accent";
 
   async function handleToggle(item: MenuItem) {
     if (busyId) return;
+
+    if (!item.active && isFreePlan(subscriptionPlan) && activeCount >= 3) {
+      redirectToSubscription();
+      return;
+    }
+
     setBusyId(item._id);
 
     try {
@@ -67,6 +83,7 @@ export function VendorMyItemsView({ email }: VendorMyItemsViewProps) {
       );
       toast.success(data.item.active ? "Menu item activated" : "Menu item deactivated");
     } catch (toggleError) {
+      if (redirectToSubscription(toggleError)) return;
       toast.error(
         toggleError instanceof Error
           ? toggleError.message
@@ -110,6 +127,7 @@ export function VendorMyItemsView({ email }: VendorMyItemsViewProps) {
       setEditingId(null);
       toast.success("Menu item updated");
     } catch (editError) {
+      if (redirectToSubscription(editError)) return;
       toast.error(
         editError instanceof Error
           ? editError.message
@@ -133,6 +151,7 @@ export function VendorMyItemsView({ email }: VendorMyItemsViewProps) {
       setDeleteId(null);
       toast.success(data.message || "Menu item deleted");
     } catch (deleteError) {
+      if (redirectToSubscription(deleteError)) return;
       toast.error(
         deleteError instanceof Error
           ? deleteError.message
