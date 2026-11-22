@@ -11,12 +11,12 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { useAuthSession } from "@/context/auth-context";
 import { useApiList } from "@/hooks/use-api-list";
 import type { MenuItem, OrderRecord } from "@/lib/api-client";
 
 type VendorOverviewViewProps = {
   email: string;
-  subscriptionPlan: string;
 };
 
 const ORDER_STATUSES: OrderRecord["status"][] = [
@@ -33,10 +33,9 @@ const STATUS_BAR_CLASS: Record<OrderRecord["status"], string> = {
   cancelled: "bg-foreground/20",
 };
 
-export function VendorOverviewView({
-  email,
-  subscriptionPlan,
-}: VendorOverviewViewProps) {
+export function VendorOverviewView({ email }: VendorOverviewViewProps) {
+  const { user } = useAuthSession();
+  const isPremium = user?.subscriptionPlan?.toLowerCase() === "premium";
   const {
     items,
     isLoading: itemsLoading,
@@ -82,7 +81,6 @@ export function VendorOverviewView({
     );
   }
 
-  const isPremium = subscriptionPlan.toLowerCase() === "premium";
   const stats: Array<{
     label: string;
     value: string | number;
@@ -132,10 +130,12 @@ export function VendorOverviewView({
             <PlusCircle className="h-4 w-4" />
             Add Menu Item
           </Link>
-          <Link href="/dashboard/vendor/subscription" className={pillClass}>
-            <Sparkles className="h-4 w-4" />
-            Upgrade Subscription
-          </Link>
+          {!isPremium ? (
+            <Link href="/dashboard/vendor/subscription" className={pillClass}>
+              <Sparkles className="h-4 w-4" />
+              Upgrade Subscription
+            </Link>
+          ) : null}
         </div>
       </div>
 

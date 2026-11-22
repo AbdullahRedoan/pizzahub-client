@@ -25,10 +25,7 @@ export function VendorDashboard({ section }: { section: VendorSection }) {
       <DashboardShell role="vendor">
         {user ? (
           section === "overview" ? (
-            <VendorOverviewView
-              email={user.email}
-              subscriptionPlan={user.subscriptionPlan}
-            />
+            <VendorOverviewView email={user.email} />
           ) : section === "add-item" ? (
             <VendorAddItemView
               email={user.email}
