@@ -1,14 +1,11 @@
-import { Flame, Mail, MapPin, Phone } from "lucide-react";
+"use client";
+
+import { Mail, MapPin, Phone } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { CopyrightYear } from "@/components/layout/copyright-year";
-
-const FOOTER_LINKS = [
-  { label: "Home", href: "/" },
-  { label: "Browse Menu", href: "/menu" },
-  { label: "Vendor Plans", href: "/vendor-plans" },
-  { label: "Sign Up", href: "/sign-up" },
-];
+import { useAuthSession } from "@/context/auth-context";
 
 function XLogo() {
   return (
@@ -60,15 +57,29 @@ function FacebookLogo() {
 }
 
 export function Footer() {
+  const { user } = useAuthSession();
+  const footerLinks = [
+    { label: "Home", href: "/" },
+    { label: "Browse Menu", href: "/menu" },
+    ...(user?.role === "vendor"
+      ? [{ label: "Vendor Plans", href: "/dashboard/vendor" }]
+      : []),
+    { label: "Sign Up", href: "/sign-up" },
+  ];
+
   return (
     <footer className="border-t border-border bg-card text-foreground">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <Link href="/" className="inline-flex items-center gap-2.5">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background">
-                <Flame className="h-4 w-4 text-accent" />
-              </span>
+              <Image
+                src="/images/logo.png"
+                alt=""
+                width={32}
+                height={32}
+                className="h-8 w-8 rounded-full border border-border bg-background object-contain"
+              />
               <span className="font-serif text-2xl font-bold italic tracking-tight text-foreground">
                 PizzaHub
               </span>
@@ -87,7 +98,7 @@ export function Footer() {
               Explore
             </h2>
             <ul className="mt-5 space-y-3 text-sm">
-              {FOOTER_LINKS.map((link) => (
+              {footerLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
@@ -108,26 +119,24 @@ export function Footer() {
               <li className="flex items-start gap-3">
                 <Mail className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
                 <a
-                  href="mailto:concierge@pizzahub.example"
+                  href="mailto:abdullahredoanarb@gmail.com"
                   className="text-foreground transition-colors hover:text-accent"
                 >
-                  concierge@pizzahub.example
+                  abdullahredoanarb@gmail.com
                 </a>
               </li>
               <li className="flex items-start gap-3">
                 <Phone className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
                 <a
-                  href="tel:+8801700900410"
+                  href="tel:+8801516510387"
                   className="text-foreground transition-colors hover:text-accent"
                 >
-                  +880 1700-900410
+                  +8801516510387
                 </a>
               </li>
               <li className="flex items-start gap-3">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
-                <span className="text-foreground">
-                  Dhanmondi &amp; Gulshan, Dhaka
-                </span>
+                <span className="text-foreground">Wari, Dhaka</span>
               </li>
             </ul>
           </div>
