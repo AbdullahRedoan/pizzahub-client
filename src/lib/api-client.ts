@@ -62,7 +62,8 @@ export interface TransactionRecord {
   _id: string;
   vendorId: string;
   vendorName: string;
-  plan: "premium";
+  vendorEmail?: string;
+  plan: "Premium" | "premium";
   amount: number;
   currency: string;
   stripeSessionId: string;

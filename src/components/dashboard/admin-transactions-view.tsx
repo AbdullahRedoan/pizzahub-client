@@ -71,12 +71,11 @@ export function AdminTransactionsView({ email }: AdminTransactionsViewProps) {
           <table className="w-full min-w-[720px] text-left text-sm">
             <thead className="border-b border-border text-xs uppercase tracking-wide text-foreground/60">
               <tr>
-                <th className="px-5 py-4 font-medium">Vendor Name</th>
-                <th className="px-5 py-4 font-medium">Plan</th>
-                <th className="px-5 py-4 font-medium">Amount</th>
-                <th className="px-5 py-4 font-medium">Status</th>
-                <th className="px-5 py-4 font-medium">Stripe Session ID</th>
-                <th className="px-5 py-4 font-medium">Date</th>
+                <th className="px-5 py-4 font-medium">Vendor Info</th>
+                <th className="px-5 py-4 font-medium">Subscription Plan</th>
+                <th className="px-5 py-4 font-medium">Payment Amount</th>
+                <th className="px-5 py-4 font-medium">Payment Status</th>
+                <th className="px-5 py-4 font-medium">Transaction Date</th>
               </tr>
             </thead>
             <tbody>
@@ -85,8 +84,13 @@ export function AdminTransactionsView({ email }: AdminTransactionsViewProps) {
                   key={transaction._id}
                   className="border-b border-border last:border-0"
                 >
-                  <td className="px-5 py-4 font-serif font-semibold italic text-foreground">
-                    {transaction.vendorName || "—"}
+                  <td className="px-5 py-4">
+                    <p className="font-serif font-semibold italic text-foreground">
+                      {transaction.vendorName || "—"}
+                    </p>
+                    <p className="mt-0.5 text-xs text-foreground/60">
+                      {transaction.vendorEmail || "—"}
+                    </p>
                   </td>
                   <td className="px-5 py-4 capitalize text-foreground/80">
                     {transaction.plan}
@@ -98,9 +102,6 @@ export function AdminTransactionsView({ email }: AdminTransactionsViewProps) {
                     <span className="rounded-full border border-primary bg-primary px-3 py-1 text-xs font-medium capitalize text-primary-foreground">
                       {transaction.status}
                     </span>
-                  </td>
-                  <td className="max-w-[200px] truncate px-5 py-4 font-mono text-xs text-foreground/70">
-                    {transaction.stripeSessionId}
                   </td>
                   <td className="px-5 py-4 text-xs text-foreground/70">
                     {formatDate(transaction.createdAt)}
