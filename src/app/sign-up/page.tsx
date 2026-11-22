@@ -1,10 +1,17 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, Check, Eye, EyeOff, Store, User } from "lucide-react";
+import { ArrowRight, Check, Eye, EyeOff, Store, User, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import { toast } from "sonner";
 import { AuthAmbientBackdrop } from "@/components/auth/auth-ambient-backdrop";
 import { useAuthSession } from "@/context/auth-context";
@@ -20,6 +27,22 @@ const SOCIAL_LABEL: Record<SocialProvider, string> = {
   facebook: "Facebook",
 };
 
+function readFileAsBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const result = String(reader.result || "");
+      resolve(result.includes(",") ? result.split(",")[1] ?? "" : "");
+    };
+    reader.onerror = () => {
+      reject(new Error("We could not read that photo."));
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function SignUpPage() {
   const router = useRouter();
   const { user, isPending, refetch } = useAuthSession();
@@ -29,10 +52,14 @@ export default function SignUpPage() {
   const [businessName, setBusinessName] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [socialLoading, setSocialLoading] = useState<SocialProvider | null>(
     null,
   );
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const passwordChecks = {
     length: password.length >= 6,
@@ -47,6 +74,67 @@ export default function SignUpPage() {
       router.replace(getDashboardRouteByRole(user.role));
     }
   }, [isPending, user, router]);
+
+  useEffect(() => {
+    return () => {
+      if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+    };
+  }, [avatarPreview]);
+
+  function handleAvatarChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] ?? null;
+    setAvatarFile(file);
+    setAvatarPreview(file ? URL.createObjectURL(file) : null);
+  }
+
+  function clearAvatar() {
+    setAvatarFile(null);
+    setAvatarPreview(null);
+    if (avatarInputRef.current) avatarInputRef.current.value = "";
+  }
+
+  async function uploadAvatar(file: File): Promise<string | undefined> {
+    const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
+
+    if (!apiKey) {
+      toast.warning(
+        "Photo upload is unavailable right now. We'll create your account without a profile photo.",
+      );
+      return undefined;
+    }
+
+    setUploadingPhoto(true);
+
+    try {
+      const base64Image = await readFileAsBase64(file);
+      const uploadBody = new FormData();
+      uploadBody.append("image", base64Image);
+
+      const response = await fetch(
+        `https://api.imgbb.com/1/upload?key=${apiKey}`,
+        { method: "POST", body: uploadBody },
+      );
+      const data = (await response.json()) as {
+        data?: { url?: string };
+        error?: { message?: string };
+      };
+
+      if (!response.ok || !data.data?.url) {
+        throw new Error(data.error?.message || "Image upload failed");
+      }
+
+      return data.data.url;
+    } catch (uploadError) {
+      toast.warning(
+        uploadError instanceof Error
+          ? `${uploadError.message} Continuing without a profile photo.`
+          : "We could not upload your photo. Continuing without a profile photo.",
+      );
+      return undefined;
+    } finally {
+      setUploadingPhoto(false);
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -67,10 +155,13 @@ export default function SignUpPage() {
     setSubmitting(true);
 
     try {
+      const image = avatarFile ? await uploadAvatar(avatarFile) : undefined;
+
       const { error } = await authClient.signUp.email({
         name: name.trim(),
         email,
         password,
+        image: image || undefined,
         role,
         ...(role === "vendor" && businessName.trim()
           ? { businessName: businessName.trim() }
@@ -93,7 +184,7 @@ export default function SignUpPage() {
   }
 
   async function handleSocial(provider: SocialProvider) {
-    if (socialLoading || submitting) return;
+    if (socialLoading || submitting || uploadingPhoto) return;
 
     setSocialLoading(provider);
 
@@ -173,6 +264,45 @@ export default function SignUpPage() {
               placeholder="you@example.com"
               className="w-full rounded-full border border-border bg-background px-5 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-foreground/50 focus:border-accent"
             />
+          </div>
+
+          <div className="space-y-1.5">
+            <label
+              htmlFor="sign-up-avatar"
+              className="block text-xs font-medium uppercase tracking-wide text-foreground/70"
+            >
+              Profile Photo (Optional)
+            </label>
+            <div className="flex items-center gap-3">
+              <input
+                ref={avatarInputRef}
+                id="sign-up-avatar"
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="min-w-0 flex-1 rounded-full border border-border bg-background px-4 py-2.5 text-xs text-foreground outline-none transition-colors file:mr-3 file:rounded-full file:border-0 file:bg-primary file:px-4 file:py-1.5 file:text-xs file:font-semibold file:text-primary-foreground focus:border-accent"
+              />
+              {avatarPreview ? (
+                <div className="flex shrink-0 items-center gap-2">
+                  <Image
+                    src={avatarPreview}
+                    alt="Selected profile photo preview"
+                    width={40}
+                    height={40}
+                    unoptimized
+                    className="h-10 w-10 rounded-full border border-border object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={clearAvatar}
+                    aria-label="Remove profile photo"
+                    className="flex h-7 w-7 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:text-accent"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ) : null}
+            </div>
           </div>
 
           <fieldset className="space-y-2">
@@ -299,11 +429,15 @@ export default function SignUpPage() {
 
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || uploadingPhoto}
             className="flex w-full items-center justify-center gap-2 rounded-full border border-primary bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {submitting ? "Creating account..." : "Create Account"}
-            {!submitting && <ArrowRight className="h-4 w-4" />}
+            {uploadingPhoto
+              ? "Uploading photo..."
+              : submitting
+                ? "Creating account..."
+                : "Create Account"}
+            {!submitting && !uploadingPhoto && <ArrowRight className="h-4 w-4" />}
           </button>
         </form>
 
@@ -316,7 +450,7 @@ export default function SignUpPage() {
         <div className="grid gap-3 font-sans sm:grid-cols-2">
           <button
             type="button"
-            disabled={socialLoading !== null || submitting}
+            disabled={socialLoading !== null || submitting || uploadingPhoto}
             onClick={() => handleSocial("google")}
             className="flex w-full items-center justify-center gap-2 rounded-full border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:text-accent disabled:cursor-not-allowed disabled:opacity-60"
           >
@@ -327,7 +461,7 @@ export default function SignUpPage() {
           </button>
           <button
             type="button"
-            disabled={socialLoading !== null || submitting}
+            disabled={socialLoading !== null || submitting || uploadingPhoto}
             onClick={() => handleSocial("facebook")}
             className="flex w-full items-center justify-center gap-2 rounded-full border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:text-accent disabled:cursor-not-allowed disabled:opacity-60"
           >
