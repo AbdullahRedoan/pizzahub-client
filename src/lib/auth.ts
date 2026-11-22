@@ -57,6 +57,12 @@ function createAuth() {
       secret: requireEnv("BETTER_AUTH_SECRET"),
       baseURL: requireEnv("BETTER_AUTH_URL"),
       database: mongodbAdapter(db, { client }),
+      // Stripe's webhook writes subscriptionPlan directly to MongoDB. A cached
+      // session cookie would keep returning the old plan after checkout, so
+      // get-session must always read the live user document.
+      session: {
+        cookieCache: { enabled: false },
+      },
       emailAndPassword: {
         enabled: true,
         minPasswordLength: 6,
